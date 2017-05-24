@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rosflight_utils</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>Supporting utilities for ROSflight packages</description>
 
   <maintainer email="gary.ellingson@byu.edu">gary</maintainer>
@@ -16,8 +16,12 @@
 
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>gazebo_msgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>rosflight_msgs</depend>
+  <depend>rosgraph_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>std_srvs</depend>
 
   <export>
   </export>
