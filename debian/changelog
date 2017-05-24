@@ -1,0 +1,14 @@
+ros-kinetic-rosflight-pkgs (0.1.1-0xenial) xenial; urgency=high
+
+
+
+ -- Daniel Koch <daniel.koch@byu.edu>  Wed, 24 May 2017 06:00:00 -0000
+
+ros-kinetic-rosflight-pkgs (0.1.0-0xenial) xenial; urgency=high
+
+  * Added rosflight_pkgs metapackage
+  * Contributors: Daniel Koch
+
+ -- Daniel Koch <daniel.koch@byu.edu>  Mon, 22 May 2017 06:00:00 -0000
+
+
