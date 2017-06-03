@@ -1,0 +1,12 @@
+Source: ros-kinetic-rosflight-pkgs
+Section: misc
+Priority: extra
+Maintainer: Daniel Koch <daniel.p.koch@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-kinetic-catkin
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-rosflight-pkgs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-kinetic-rosflight, ros-kinetic-rosflight-msgs, ros-kinetic-rosflight-utils
+Description: ROS interface for the ROSflight autpilot stack
