@@ -43,15 +43,21 @@
 namespace mavrosflight
 {
 
-ParamManager::ParamManager(MavlinkSerial * const serial) :
-  serial_(serial),
+ParamManager::ParamManager(MavlinkComm * const comm) :
+  comm_(comm),
   unsaved_changes_(false),
   write_request_in_progress_(false),
   first_param_received_(false),
   received_count_(0),
-  got_all_params_(false)
+  got_all_params_(false),
+  param_set_in_progress_(false)
 {
-  serial_->register_mavlink_listener(this);
+  comm_->register_mavlink_listener(this);
+
+  param_set_timer_ = nh_.createTimer(ros::Duration(ros::Rate(100)),
+                                     &ParamManager::param_set_timer_callback, this,
+                                     false, /* not oneshot */
+                                     false /* not autostart */);
 }
 
 ParamManager::~ParamManager()
@@ -100,7 +106,13 @@ bool ParamManager::set_param_value(std::string name, double value)
   {
     mavlink_message_t msg;
     params_[name].requestSet(value, &msg);
-    serial_->send_message(msg);
+
+    param_set_queue_.push_back(msg);
+    if (!param_set_in_progress_)
+    {
+      param_set_timer_.start();
+      param_set_in_progress_ = true;
+    }
 
     return true;
   }
@@ -118,7 +130,7 @@ bool ParamManager::write_params()
     uint8_t sysid = 1;
     uint8_t compid = 1;
     mavlink_msg_rosflight_cmd_pack(sysid, compid, &msg, ROSFLIGHT_CMD_WRITE_PARAMS);
-    serial_->send_message(msg);
+    comm_->send_message(msg);
 
     write_request_in_progress_ = true;
     return true;
@@ -248,7 +260,7 @@ void ParamManager::request_param_list()
 {
   mavlink_message_t param_list_msg;
   mavlink_msg_param_request_list_pack(1, 50, &param_list_msg, 1, MAV_COMP_ID_ALL);
-  serial_->send_message(param_list_msg);
+  comm_->send_message(param_list_msg);
 }
 
 void ParamManager::request_param(int index)
@@ -256,7 +268,7 @@ void ParamManager::request_param(int index)
   mavlink_message_t param_request_msg;
   char empty[MAVLINK_MSG_PARAM_VALUE_FIELD_PARAM_ID_LEN];
   mavlink_msg_param_request_read_pack(1, 50, &param_request_msg, 1, MAV_COMP_ID_ALL, empty, (int16_t) index);
-  serial_->send_message(param_request_msg);
+  comm_->send_message(param_request_msg);
 }
 
 void ParamManager::handle_param_value_msg(const mavlink_message_t &msg)
@@ -364,6 +376,20 @@ int ParamManager::get_params_received()
 bool ParamManager::got_all_params()
 {
   return got_all_params_;
+}
+
+void ParamManager::param_set_timer_callback(const ros::TimerEvent &event)
+{
+  if (param_set_queue_.empty())
+  {
+    param_set_timer_.stop();
+    param_set_in_progress_ = false;
+  }
+  else
+  {
+    comm_->send_message(param_set_queue_.front());
+    param_set_queue_.pop_front();
+  }
 }
 
 } // namespace mavrosflight
