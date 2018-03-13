@@ -1,3 +1,32 @@
+## rosflight (kinetic) - 1.0.0-0
+
+The packages in the `rosflight` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release rosflight --track kinetic --rosdistro kinetic` on `Tue, 13 Mar 2018 16:26:16 -0000`
+
+These packages were released:
+- `rosflight`
+- `rosflight_firmware`
+- `rosflight_msgs`
+- `rosflight_pkgs`
+- `rosflight_sim`
+- `rosflight_utils`
+
+Version of package(s) in repository `rosflight`:
+
+- upstream repository: https://github.com/rosflight/rosflight.git
+- release repository: https://github.com/rosflight/rosflight-release.git
+- rosdistro version: `0.1.3-0`
+- old version: `0.1.3-0`
+- new version: `1.0.0-0`
+
+Versions of tools used:
+
+- bloom version: `0.6.2`
+- catkin_pkg version: `0.4.1`
+- rosdep version: `0.12.1`
+- rosdistro version: `0.6.6`
+- vcstools version: `0.1.40`
+
+
 ## rosflight (kinetic) - 0.1.3-0
 
 The packages in the `rosflight` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release rosflight --track kinetic --rosdistro kinetic` on `Sat, 03 Jun 2017 05:51:33 -0000`
