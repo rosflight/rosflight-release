@@ -1,0 +1,12 @@
+Source: ros-lunar-rosflight-pkgs
+Section: misc
+Priority: extra
+Maintainer: Daniel Koch <daniel.p.koch@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-lunar-catkin
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-lunar-rosflight-pkgs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-lunar-rosflight, ros-lunar-rosflight-firmware, ros-lunar-rosflight-msgs, ros-lunar-rosflight-sim, ros-lunar-rosflight-utils
+Description: ROS interface for the ROSflight autpilot stack
