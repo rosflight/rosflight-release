@@ -1,0 +1,12 @@
+Source: ros-lunar-rosflight-sim
+Section: misc
+Priority: extra
+Maintainer: James Jackson <superjax08@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), gazebo7, libeigen3-dev, ros-lunar-catkin, ros-lunar-gazebo-plugins, ros-lunar-gazebo-ros, ros-lunar-geometry-msgs, ros-lunar-roscpp, ros-lunar-rosflight-firmware, ros-lunar-rosflight-msgs
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-lunar-rosflight-sim
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, gazebo7, libeigen3-dev, ros-lunar-gazebo-plugins, ros-lunar-gazebo-ros, ros-lunar-geometry-msgs, ros-lunar-roscpp, ros-lunar-rosflight-firmware, ros-lunar-rosflight-msgs
+Description: Software-in-the-loop (SIL) simulator for the ROSflight firmware
