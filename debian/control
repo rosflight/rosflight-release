@@ -1,0 +1,12 @@
+Source: ros-lunar-rosflight-msgs
+Section: misc
+Priority: extra
+Maintainer: Daniel Koch <daniel.p.koch@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-lunar-catkin, ros-lunar-geometry-msgs, ros-lunar-message-generation, ros-lunar-std-msgs
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-lunar-rosflight-msgs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-lunar-geometry-msgs, ros-lunar-message-runtime, ros-lunar-std-msgs
+Description: Message and service definitions for the ROSflight ROS stack
