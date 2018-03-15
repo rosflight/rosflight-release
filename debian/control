@@ -1,0 +1,12 @@
+Source: ros-lunar-rosflight-utils
+Section: misc
+Priority: extra
+Maintainer: gary <gary.ellingson@byu.edu>
+Build-Depends: debhelper (>= 9.0.0), ros-lunar-catkin, ros-lunar-gazebo-msgs, ros-lunar-geometry-msgs, ros-lunar-roscpp, ros-lunar-rosflight-msgs, ros-lunar-rosgraph-msgs, ros-lunar-rospy, ros-lunar-sensor-msgs, ros-lunar-std-srvs
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-lunar-rosflight-utils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-lunar-gazebo-msgs, ros-lunar-geometry-msgs, ros-lunar-roscpp, ros-lunar-rosflight-msgs, ros-lunar-rosgraph-msgs, ros-lunar-rospy, ros-lunar-sensor-msgs, ros-lunar-std-srvs
+Description: Supporting utilities for ROSflight packages
