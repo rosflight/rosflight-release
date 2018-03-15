@@ -1,0 +1,12 @@
+Source: ros-lunar-rosflight
+Section: misc
+Priority: extra
+Maintainer: Daniel Koch <daniel.p.koch@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), git-core, libboost-all-dev, libeigen3-dev, libyaml-cpp-dev, pkg-config, ros-lunar-catkin, ros-lunar-eigen-stl-containers, ros-lunar-geometry-msgs, ros-lunar-roscpp, ros-lunar-rosflight-msgs, ros-lunar-sensor-msgs, ros-lunar-std-msgs, ros-lunar-std-srvs, ros-lunar-tf
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-lunar-rosflight
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-all-dev, libeigen3-dev, libyaml-cpp-dev, ros-lunar-eigen-stl-containers, ros-lunar-geometry-msgs, ros-lunar-roscpp, ros-lunar-rosflight-msgs, ros-lunar-sensor-msgs, ros-lunar-std-msgs, ros-lunar-std-srvs, ros-lunar-tf
+Description: Package for interfacing to the ROSflight autopilot firmware over MAVLink
