@@ -1,22 +1,24 @@
-# Building and Flashing the firmware
+# Building and Flashing the Firmware
 
-These documents are designed to help developers get up and running with developing new features and understanding the internals of the firmware.  Development is currently supported only on Ubuntu Linux 16.04.
+!!! warning "Deprecation Notice"
+    As of June 2019, plans are to deprecate support for the F1 in the near future. If you need to use an F1, you will need to retrieve an older version of the code that supports the F1. However, if there are issues, we will not be able to help you fix them.
 
-## Building firmware from source
+This guide assumes you are running Ubuntu 18.04, which is the currently supported development environment.
 
-To build the firmware, you will need the latest version of the ARM embedded toolchain.  We have had issues with compatability between versions of the gcc compiler.  Sometimes, the latest version works, and other times it does not.  To be safe, install version `5_4-2016q3`.  It appears that version 6 is not working.  The following commands will install the 32-bit dependencies, download the compiler and install it to the /opt/ directory.  It also adds it to the `PATH`
+## Installing the ARM Embedded Toolchain
+
+Currently (as of March 2020) we are targeting version 7.3.1 of the ARM embedded toolchain. This toolchain can be installed from the GNU Arm Embedded Toolchain PPA:
 
 ``` bash
-sudo apt install -y lib32ncurses5
-wget https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q3-update/+download/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
-tar -xvf gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
-sudo mv gcc-arm-none-eabi-5_4-2016q3 /opt/.
-echo "export PATH=\$PATH:/opt/gcc-arm-none-eabi-5_4-2016q3/bin" >> ~/.bashrc
-rm -rf gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
-
+sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
+sudo apt install gcc-arm-embedded
 ```
 
-Then, simply clone the repository, pull down the submodules, and build:
+You can test the installation and check which version is installed by running `arm-none-eabi-gcc --version`.
+
+## Building the Firmware from Source
+
+Now that we have the compiler installed, simply clone the ROSflight firmware repository, pull down the submodules, and build:
 
 ``` bash
 git clone https://github.com/rosflight/firmware
@@ -25,40 +27,18 @@ git submodule update --init --recursive
 make
 ```
 
-## Flashing newly built firmware
+To build only the F4 firmware, use `make BOARD=REVO`. To build only the F1 firmware, use `make BOARD=NAZE`.
 
-Install the stm32flash utility
+## Flashing Newly-Built Firmware
 
-``` bash
-git clone git://git.code.sf.net/p/stm32flash/code stm32flash-code
-cd stm32flash-code
-sudo make install
-cd ..
-rm -rf stm32flash-code
-```
+First, make sure you have configured your computer as described in the [Serial Port Configuration](../user-guide/flight-controller-setup.md#serial-port-configuration) section of the user guide.
 
-Then put the board in bootloader mode (short the boot pins while cycling power) and type `make flash`
+### F4
 
+Flash the firmware to the board by running `make BOARD=REVO flash`.
+If necessary, specify the serial port with `make BOARD=REVO SERIAL_DEVICE=/dev/ttyACM0 flash`.
 
-## Building and running unit tests
+### F1
 
-Contributions will need to pass our continuous integration unit tests before merging.  To test your contributions against these tests, you'll first need to install Eigen and gtest
-
-``` bash
-sudo apt install libgtest-dev libeigen3-dev cmake
-cd /usr/src/gtest
-sudo cmake CMakeLists.txt
-sudo make
-sudo cp *.a /usr/lib
-```
-
-Then you'll need to build and run the tests themselves
-
-``` bash
-cd <firmware_directory>/test
-mkdir build
-cd build
-cmake ..
-make
-./unit_tests
-```
+Flash the firmware to the board by running `make BOARD=NAZE flash`
+If necessary, specify the serial port with `make BOARD=REVO SERIAL_DEVICE=/dev/ttyUSB0 flash`.

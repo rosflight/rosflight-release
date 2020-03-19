@@ -33,16 +33,100 @@
 #ifndef ROSFLIGHT_FIRMWARE_SENSORS_H
 #define ROSFLIGHT_FIRMWARE_SENSORS_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstring>
 #include <turbomath/turbomath.h>
+
+#include "interface/param_listener.h"
 
 namespace rosflight_firmware
 {
+// Fix type, as defined in sensor_msgs/NavSatStatus
+enum GNSSFixType
+{
+  GNSS_FIX_TYPE_NO_FIX,   // Unable to fix position
+  GNSS_FIX_TYPE_FIX,      // Unaugmented fix
+  GNSS_FIX_TYPE_SBAS_FIX, // with satellite-based augmentation
+  GNSS_FIX_TYPE_GBAS_FIX  // with ground-based augmentation
+};
+
+struct GNSSData
+{
+  struct ECEF
+  {
+    int32_t x; // cm
+    int32_t y; // cm
+    int32_t z; // cm
+    uint32_t p_acc; // cm
+    int32_t vx; // cm/s
+    int32_t vy; // cm/s
+    int32_t vz; // cm/s
+    uint32_t s_acc; // cm/s
+  };
+
+  GNSSFixType fix_type;
+  uint32_t time_of_week;
+  uint64_t time; // Unix time, in seconds
+  uint64_t nanos; // Fractional time
+  int32_t lat; // deg*10^-7
+  int32_t lon; // deg*10^-7
+  int32_t height; // mm
+  int32_t vel_n; // mm/s
+  int32_t vel_e; // mm/s
+  int32_t vel_d; // mm/s
+  uint32_t h_acc; // mm
+  uint32_t v_acc; // mm
+
+  ECEF ecef;
+
+  uint64_t rosflight_timestamp; // microseconds, time stamp of last byte in the message
+
+  GNSSData()
+  {
+    memset(this, 0, sizeof(GNSSData));
+  }
+};
+
+struct GNSSRaw
+{
+  uint64_t time_of_week;
+  uint16_t year;
+  uint8_t month;
+  uint8_t day;
+  uint8_t hour;
+  uint8_t min;
+  uint8_t sec;
+  uint8_t valid;
+  uint32_t t_acc;
+  int32_t nano;
+  uint8_t fix_type;
+  uint8_t num_sat;
+  int32_t lon;
+  int32_t lat;
+  int32_t height;
+  int32_t height_msl;
+  uint32_t h_acc;
+  uint32_t v_acc;
+  int32_t vel_n;
+  int32_t vel_e;
+  int32_t vel_d;
+  int32_t g_speed;
+  int32_t head_mot;
+  uint32_t s_acc;
+  uint32_t head_acc;
+  uint16_t p_dop;
+  uint64_t rosflight_timestamp; // microseconds, time stamp of last byte in the message
+
+  GNSSRaw()
+  {
+    memset(this, 0, sizeof(GNSSRaw));
+  }
+};
 
 class ROSflight;
 
-class Sensors
+class Sensors : public ParamListenerInterface
 {
 public:
   struct Data
@@ -66,21 +150,33 @@ public:
     float sonar_range = 0;
     bool sonar_range_valid = false;
 
+    GNSSData gnss_data;
+    bool gnss_new_data = false;
+    float gps_CNO = 0; // What is this?
+    bool gnss_present = false;
+    GNSSRaw gnss_raw;
+
     turbomath::Vector mag = {0, 0, 0};
 
     bool baro_present = false;
     bool mag_present = false;
     bool sonar_present = false;
     bool diff_pressure_present = false;
+
+    bool battery_monitor_present = false;
+    float battery_voltage = 0;
+    float battery_current = 0;
   };
 
-  Sensors(ROSflight& rosflight);
+  Sensors(ROSflight &rosflight);
 
-  inline const Data& data() const { return data_; }
+  inline const Data &data() const { return data_; }
+  void get_filtered_IMU(turbomath::Vector &accel, turbomath::Vector &gyro, uint64_t &stamp_us);
 
   // function declarations
   void init();
   bool run();
+  void param_change_callback(uint16_t param_id) override;
 
   // Calibration Functions
   bool start_imu_calibration(void);
@@ -109,6 +205,7 @@ private:
   static const int SENSOR_CAL_CYCLES;
   static const float BARO_MAX_CALIBRATION_VARIANCE;
   static const float DIFF_PRESSURE_MAX_CALIBRATION_VARIANCE;
+  static constexpr uint32_t BATTERY_MONITOR_UPDATE_PERIOD_MS = 10;
 
   class OutlierFilter
   {
@@ -119,21 +216,23 @@ private:
     bool init_ = false;
 
   public:
-    OutlierFilter() {};
+    OutlierFilter() {}
     void init(float max_change_rate, float update_rate, float center);
     bool update(float new_val, float *val);
   };
 
-  enum LowPrioritySensors
+  enum : uint8_t
   {
     BAROMETER,
+    GNSS,
     DIFF_PRESSURE,
     SONAR,
     MAGNETOMETER,
+    BATTERY_MONITOR,
     NUM_LOW_PRIORITY_SENSORS
   };
 
-  ROSflight& rf_;
+  ROSflight &rf_;
 
   Data data_;
 
@@ -142,7 +241,8 @@ private:
 
   bool calibrating_acc_flag_ = false;
   bool calibrating_gyro_flag_ = false;
-  LowPrioritySensors next_sensor_to_update_ = BAROMETER;
+  uint8_t next_sensor_to_update_ = BAROMETER;
+  void init_imu();
   void calibrate_accel(void);
   void calibrate_gyro(void);
   void calibrate_baro(void);
@@ -152,8 +252,10 @@ private:
   void correct_baro(void);
   void correct_diff_pressure(void);
   bool update_imu(void);
+  void update_battery_monitor(void);
   void update_other_sensors(void);
   void look_for_disabled_sensors(void);
+  void update_battery_monitor_multipliers(void);
   uint32_t last_time_look_for_disarmed_sensors_ = 0;
   uint32_t last_imu_update_ms_ = 0;
 
@@ -169,6 +271,12 @@ private:
   float acc_temp_sum_ = 0.0f;
   turbomath::Vector max_ = {-1000.0f, -1000.0f, -1000.0f};
   turbomath::Vector min_ = {1000.0f, 1000.0f, 1000.0f};
+
+  // Filtered IMU
+  turbomath::Vector accel_int_;
+  turbomath::Vector gyro_int_;
+  uint64_t int_start_us_;
+  uint64_t prev_imu_read_time_us_;
 
   // Baro Calibration
   bool baro_calibrated_ = false;
@@ -190,6 +298,10 @@ private:
   OutlierFilter diff_outlier_filt_;
   OutlierFilter sonar_outlier_filt_;
 
+  uint32_t last_battery_monitor_update_ms_ = 0;
+  // Battery Monitor
+  float battery_voltage_alpha_{0.995};
+  float battery_current_alpha_{0.995};
 };
 
 } // namespace rosflight_firmware
