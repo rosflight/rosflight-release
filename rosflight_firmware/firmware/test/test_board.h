@@ -32,7 +32,8 @@
 #ifndef ROSFLIGHT_FIRMWARE_TEST_BOARD_H
 #define ROSFLIGHT_FIRMWARE_TEST_BOARD_H
 
-#include "board.h" 
+#include "board.h"
+#include "sensors.h"
 
 namespace rosflight_firmware
 {
@@ -41,74 +42,103 @@ class testBoard : public Board
 {
 
 private:
-  uint16_t rc_values[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  uint16_t rc_values[8] = {1500, 1500, 1000, 1500, 1500, 1500, 1500, 1500};
   uint64_t time_us_ = 0;
   bool rc_lost_ = false;
   float acc_[3] = {0, 0, 0};
   float gyro_[3] = {0, 0, 0};
   bool new_imu_ = false;
+  static constexpr size_t BACKUP_MEMORY_SIZE{1024};
+  uint8_t backup_memory_[BACKUP_MEMORY_SIZE];
 
 public:
 // setup
-  void init_board(void);
-  void board_reset(bool bootloader);
+  void init_board() override;
+  void board_reset(bool bootloader) override;
 
 // clock
-  uint32_t clock_millis();
-  uint64_t clock_micros();
-  void clock_delay(uint32_t milliseconds);
+  uint32_t clock_millis() override;
+  uint64_t clock_micros() override;
+  void clock_delay(uint32_t milliseconds) override;
 
 // serial
-  void serial_init(uint32_t baud_rate);
-  void serial_write(const uint8_t *src, size_t len);
-  uint16_t serial_bytes_available(void);
-  uint8_t serial_read(void);
+  void serial_init(uint32_t baud_rate, uint32_t dev) override;
+  void serial_write(const uint8_t *src, size_t len) override;
+  uint16_t serial_bytes_available() override;
+  uint8_t serial_read() override;
+  void serial_flush() override;
 
 // sensors
-  void sensors_init();
-  uint16_t num_sensor_errors(void) ;
+  void sensors_init() override;
+  uint16_t num_sensor_errors() ;
 
-  bool new_imu_data();
-  bool imu_read(float accel[3], float *temperature, float gyro[3], uint64_t* time);
-  void imu_not_responding_error(void);
+  bool new_imu_data() override;
+  bool imu_read(float accel[3], float *temperature, float gyro[3], uint64_t *time) override;
+  void imu_not_responding_error() override;
 
-  bool mag_check(void);
-  void mag_read(float mag[3]);
+  bool mag_present() override;
+  void mag_update() override;
+  void mag_read(float mag[3]) override;
 
-  bool baro_check(void);
-  void baro_read(float *pressure, float *temperature);
+  bool baro_present() override;
+  void baro_update() override;
+  void baro_read(float *pressure, float *temperature) override;
 
-  bool diff_pressure_check(void);
-  void diff_pressure_read(float *diff_pressure, float *temperature);
+  bool diff_pressure_present() override;
+  void diff_pressure_update() override;
+  void diff_pressure_read(float *diff_pressure, float *temperature) override;
 
-  bool sonar_check(void);
-  float sonar_read(void);
+  bool sonar_present() override;
+  void sonar_update() override;
+  float sonar_read() override;
+
+  bool gnss_present() override { return false; }
+  void gnss_update() override {}
+  GNSSData gnss_read() override;
+  GNSSRaw gnss_raw_read() override;
+  bool gnss_has_new_data() override;
+
+  bool battery_voltage_present() const override;
+  float battery_voltage_read() const override;
+  void battery_voltage_set_multiplier(double multiplier) override;
+
+  bool battery_current_present() const override;
+  float battery_current_read() const override;
+  void battery_current_set_multiplier(double multiplier) override;
+
+// RC
+  void rc_init(rc_type_t rc_type) override;
+  bool rc_lost() override;
+  float rc_read(uint8_t channel) override;
 
 // PWM
-// TODO make these deal in normalized (-1 to 1 or 0 to 1) values (not pwm-specific)
-  void pwm_init(bool cppm, uint32_t refresh_rate, uint16_t idle_pwm);
-  bool pwm_lost();
-  uint16_t pwm_read(uint8_t channel);
-  void pwm_write(uint8_t channel, uint16_t value);
+  void pwm_init(uint32_t refresh_rate, uint16_t idle_pwm) override;
+  void pwm_disable() override;
+  void pwm_write(uint8_t channel, float value) override;
 
 // non-volatile memory
-  void memory_init(void);
-  bool memory_read(void *dest, size_t len);
-  bool memory_write(const void *src, size_t len);
+  void memory_init() override;
+  bool memory_read(void *dest, size_t len) override;
+  bool memory_write(const void *src, size_t len) override;
 
 // LEDs
-  void led0_on(void);
-  void led0_off(void);
-  void led0_toggle(void);
+  void led0_on() override;
+  void led0_off() override;
+  void led0_toggle() override;
 
-  void led1_on(void);
-  void led1_off(void);
-  void led1_toggle(void);
+  void led1_on() override;
+  void led1_off() override;
+  void led1_toggle() override;
 
+//Backup memory
+  void backup_memory_init() override {}
+  bool backup_memory_read(void *dest, size_t len) override;
+  void backup_memory_write(const void *src, size_t len) override;
+  void backup_memory_clear(size_t len) override;
+  void backup_memory_clear(); // Not an override
 
-
-  void set_imu(float* acc, float* gyro, uint64_t time_us);
-  void set_rc(uint16_t* values);
+  void set_imu(float *acc, float *gyro, uint64_t time_us);
+  void set_rc(uint16_t *values);
   void set_time(uint64_t time_us);
   void set_pwm_lost(bool lost);
 
