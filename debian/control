@@ -1,0 +1,12 @@
+Source: ros-melodic-rosflight-firmware
+Section: misc
+Priority: optional
+Maintainer: Daniel Koch <daniel.p.koch@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), ros-melodic-catkin, ros-melodic-roscpp
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-melodic-rosflight-firmware
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-melodic-roscpp
+Description: Firmware library for software-in-the-loop of the ROSflight ROS stack
