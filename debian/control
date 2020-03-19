@@ -1,0 +1,12 @@
+Source: ros-melodic-rosflight
+Section: misc
+Priority: optional
+Maintainer: Daniel Koch <daniel.p.koch@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), git, libboost-all-dev, libeigen3-dev, libyaml-cpp-dev, pkg-config, ros-melodic-catkin, ros-melodic-eigen-stl-containers, ros-melodic-geometry-msgs, ros-melodic-roscpp, ros-melodic-rosflight-msgs, ros-melodic-sensor-msgs, ros-melodic-std-msgs, ros-melodic-std-srvs, ros-melodic-tf
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-melodic-rosflight
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-all-dev, libeigen3-dev, libyaml-cpp-dev, ros-melodic-eigen-stl-containers, ros-melodic-geometry-msgs, ros-melodic-roscpp, ros-melodic-rosflight-msgs, ros-melodic-sensor-msgs, ros-melodic-std-msgs, ros-melodic-std-srvs, ros-melodic-tf
+Description: Package for interfacing to the ROSflight autopilot firmware over MAVLink
