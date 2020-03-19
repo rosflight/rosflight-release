@@ -1,0 +1,12 @@
+Source: ros-kinetic-rosflight-sim
+Section: misc
+Priority: optional
+Maintainer: James Jackson <superjax08@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), gazebo7, libeigen3-dev, ros-kinetic-catkin, ros-kinetic-gazebo-plugins, ros-kinetic-gazebo-ros, ros-kinetic-geometry-msgs, ros-kinetic-roscpp, ros-kinetic-rosflight-firmware, ros-kinetic-rosflight-msgs
+Homepage: http://rosflight.org
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-rosflight-sim
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, gazebo7, libeigen3-dev, ros-kinetic-gazebo-plugins, ros-kinetic-gazebo-ros, ros-kinetic-geometry-msgs, ros-kinetic-roscpp, ros-kinetic-rosflight-firmware, ros-kinetic-rosflight-msgs
+Description: Software-in-the-loop (SIL) simulator for the ROSflight firmware
