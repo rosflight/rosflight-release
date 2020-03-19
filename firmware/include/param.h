@@ -32,18 +32,10 @@
 #ifndef ROSFLIGHT_FIRMWARE_PARAM_H
 #define ROSFLIGHT_FIRMWARE_PARAM_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <functional>
+#include <cstddef>
+#include <cstdint>
 
-#ifndef GIT_VERSION_HASH
-#define GIT_VERSION_HASH 0x00
-//#pragma message "GIT_VERSION_HASH Undefined, setting to 0x00!"
-#endif
-
-#ifndef GIT_VERSION_STRING
-#define GIT_VERSION_STRING "empty"
-#endif
+#include "interface/param_listener.h"
 
 namespace rosflight_firmware
 {
@@ -54,6 +46,7 @@ enum : uint16_t
   /*** HARDWARE CONFIGURATION ***/
   /******************************/
   PARAM_BAUD_RATE = 0,
+  PARAM_SERIAL_DEVICE,
 
   /*****************************/
   /*** MAVLINK CONFIGURATION ***/
@@ -68,9 +61,13 @@ enum : uint16_t
   PARAM_STREAM_BARO_RATE,
   PARAM_STREAM_AIRSPEED_RATE,
   PARAM_STREAM_SONAR_RATE,
+  PARAM_STREAM_GNSS_RATE,
+  PARAM_STREAM_GNSS_RAW_RATE,
+  PARAM_STREAM_BATTERY_STATUS_RATE,
 
   PARAM_STREAM_OUTPUT_RAW_RATE,
   PARAM_STREAM_RC_RAW_RATE,
+
 
   /********************************/
   /*** CONTROLLER CONFIGURATION ***/
@@ -109,16 +106,16 @@ enum : uint16_t
   PARAM_MOTOR_PWM_SEND_RATE,
   PARAM_MOTOR_IDLE_THROTTLE,
   PARAM_FAILSAFE_THROTTLE,
-  PARAM_MOTOR_MAX_PWM,
-  PARAM_MOTOR_MIN_PWM,
   PARAM_SPIN_MOTORS_WHEN_ARMED,
 
   /*******************************/
   /*** ESTIMATOR CONFIGURATION ***/
   /*******************************/
   PARAM_INIT_TIME,
-  PARAM_FILTER_KP,
+  PARAM_FILTER_KP_ACC,
   PARAM_FILTER_KI,
+  PARAM_FILTER_KP_EXT,
+  PARAM_FILTER_ACCEL_MARGIN,
 
   PARAM_FILTER_USE_QUAD_INT,
   PARAM_FILTER_USE_MAT_EXP,
@@ -126,7 +123,8 @@ enum : uint16_t
 
   PARAM_CALIBRATE_GYRO_ON_ARM,
 
-  PARAM_GYRO_ALPHA,
+  PARAM_GYRO_XY_ALPHA,
+  PARAM_GYRO_Z_ALPHA,
   PARAM_ACC_ALPHA,
 
   PARAM_GYRO_X_BIAS,
@@ -197,10 +195,27 @@ enum : uint16_t
   PARAM_AILERON_REVERSE,
   PARAM_RUDDER_REVERSE,
 
+  PARAM_FC_ROLL,
+  PARAM_FC_PITCH,
+  PARAM_FC_YAW,
+
   /********************/
   /*** ARMING SETUP ***/
   /********************/
   PARAM_ARM_THRESHOLD,
+
+  /************************/
+  /*** OFFBOARD CONTROL ***/
+  /************************/
+  PARAM_OFFBOARD_TIMEOUT,
+
+  /***********************/
+  /*** BATTERY MONITOR ***/
+  /***********************/
+  PARAM_BATTERY_VOLTAGE_MULTIPLIER,
+  PARAM_BATTERY_CURRENT_MULTIPLIER,
+  PARAM_BATTERY_VOLTAGE_ALPHA,
+  PARAM_BATTERY_CURRENT_ALPHA,
 
   // keep track of size of params array
   PARAMS_COUNT
@@ -241,22 +256,19 @@ private:
     uint8_t chk;                            // XOR checksum
   } params_t;
 
-  std::function<void(int)> callbacks[PARAMS_COUNT]; // Param change callbacks
-
   params_t params;
-  ROSflight& RF_;
+  ROSflight &RF_;
 
   void init_param_int(uint16_t id, const char name[PARAMS_NAME_LENGTH], int32_t value);
   void init_param_float(uint16_t id, const char name[PARAMS_NAME_LENGTH], float value);
   uint8_t compute_checksum(void);
 
+  ParamListenerInterface *const * listeners_;
+  size_t num_listeners_;
+
 
 public:
-  Params(ROSflight& _rf);
-
-  void add_callback(std::function<void(int)> callback, uint16_t param_id);
-
-
+  Params(ROSflight &_rf);
 
   // function declarations
 
@@ -269,6 +281,13 @@ public:
    * @brief Set all parameters to default values
    */
   void set_defaults(void);
+
+  /**
+  * @brief Specify listeners for parameter changes
+  * @param listeners An array of pointers to objects that implement the ParamListenerInterface interface
+  * @param num_listeners The length of the array passed as the listeners parameter
+  */
+  void set_listeners(ParamListenerInterface * const listeners[], size_t num_listeners);
 
   /**
    * @brief Read parameter values from non-volatile memory
@@ -300,21 +319,30 @@ public:
    * @param id The ID of the parameter
    * @return The value of the parameter
    */
-  inline int get_param_int(uint16_t id) const { return params.values[id].ivalue; }
+  inline int get_param_int(uint16_t id) const
+  {
+    return params.values[id].ivalue;
+  }
 
   /**
    * @brief Get the value of a floating point parameter by id
    * @param id The ID of the parameter
    * @return The value of the parameter
    */
-  inline float get_param_float(uint16_t id) const { return params.values[id].fvalue; }
+  inline float get_param_float(uint16_t id) const
+  {
+    return params.values[id].fvalue;
+  }
 
   /**
    * @brief Get the name of a parameter
    * @param id The ID of the parameter
    * @return The name of the parameter
    */
-  inline const char *get_param_name(uint16_t id) const { return params.names[id]; }
+  inline const char *get_param_name(uint16_t id) const
+  {
+    return params.names[id];
+  }
 
   /**
    * @brief Get the type of a parameter
@@ -324,7 +352,10 @@ public:
    * PARAM_TYPE_INT32, PARAM_TYPE_FLOAT, or PARAM_TYPE_INVALID
    * See line 165
    */
-  inline param_type_t get_param_type(uint16_t id) const { return params.types[id]; }
+  inline param_type_t get_param_type(uint16_t id) const
+  {
+    return params.types[id];
+  }
 
   /**
    * @brief Sets the value of a parameter by ID and calls the parameter change callback
