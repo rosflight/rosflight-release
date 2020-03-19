@@ -1,3 +1,32 @@
+## rosflight (melodic) - 1.3.0-1
+
+The packages in the `rosflight` repository were released into the `melodic` distro by running `/usr/bin/bloom-release rosflight --track melodic --rosdistro melodic --new-track` on `Thu, 19 Mar 2020 06:27:28 -0000`
+
+These packages were released:
+- `rosflight`
+- `rosflight_firmware`
+- `rosflight_msgs`
+- `rosflight_pkgs`
+- `rosflight_sim`
+- `rosflight_utils`
+
+Version of package(s) in repository `rosflight`:
+
+- upstream repository: https://github.com/rosflight/rosflight.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `1.3.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.9.3`
+- catkin_pkg version: `0.4.16`
+- rosdep version: `0.18.0`
+- rosdistro version: `0.8.0`
+- vcstools version: `0.1.42`
+
+
 ## rosflight (kinetic) - 1.3.0-1
 
 The packages in the `rosflight` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release rosflight --rosdistro kinetic` on `Thu, 19 Mar 2020 06:06:15 -0000`
