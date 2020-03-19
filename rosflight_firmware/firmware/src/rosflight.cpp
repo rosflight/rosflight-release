@@ -29,12 +29,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "interface/param_listener.h"
 #include "rosflight.h"
 
 namespace rosflight_firmware
 {
 
-ROSflight::ROSflight(Board& board, CommLink& comm_link) :
+ROSflight::ROSflight(Board& board, CommLinkInterface& comm_link) :
   board_(board),
   comm_manager_(*this, comm_link),
   params_(*this),
@@ -46,14 +47,13 @@ ROSflight::ROSflight(Board& board, CommLink& comm_link) :
   sensors_(*this),
   state_manager_(*this)
 {
+  comm_link.set_listener(&comm_manager_);
+  params_.set_listeners(param_listeners_, num_param_listeners_);
 }
 
 // Initialization Routine
 void ROSflight::init()
 {
-  // Initialize the board
-  board_.init_board();
-
   // Initialize the arming finite state machine
   state_manager_.init();
 
@@ -88,6 +88,12 @@ void ROSflight::init()
 
   // Initialize the command muxer
   command_manager_.init();
+
+  /***************************/
+  /***  Hardfault Recovery ***/
+  /***************************/
+
+  state_manager_.check_backup_memory();
 }
 
 
